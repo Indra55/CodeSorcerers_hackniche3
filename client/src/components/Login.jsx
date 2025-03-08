@@ -8,6 +8,7 @@ const Login = () => {
         email: "",
         password: "",
     });
+
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ const Login = () => {
         try {
             const { data: res } = await axios.post("http://localhost:5000/api/auth", data);
             localStorage.setItem("token", res.data);
-            navigate("/");
+            navigate("/home");  // Move this line here to ensure navigation only after successful login
         } catch (error) {
             if (
                 error.response &&
@@ -31,6 +32,7 @@ const Login = () => {
             }
         }
     };
+    
 
     return (
         <motion.div
@@ -85,6 +87,7 @@ const Login = () => {
                         <button
                             type="submit"
                             className="w-full p-2 bg-black text-white rounded hover:bg-gray-800 transition"
+                            // onClick={() => navigate("/home")}
                         >
                             Login
                         </button>

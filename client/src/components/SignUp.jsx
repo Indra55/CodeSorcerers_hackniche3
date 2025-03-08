@@ -22,6 +22,7 @@ const SignUp = () => {
         e.preventDefault();
         setError("");
         setSuccess("");
+        navigate("/home")
         try {
             const url = "http://localhost:5000/api/users";
             const { data: res } = await axios.post(url, data);
