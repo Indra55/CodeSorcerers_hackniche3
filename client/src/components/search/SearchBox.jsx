@@ -3,11 +3,16 @@ import { useState, useEffect } from "react";
 import SearchSuggestions from "./SearchSuggestions";
 import VisualSearchButton from "./VisualSearch";
 
+// Check for Web Speech API support
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
 const SearchBox = ({ variant }) => {
   // State
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false); // For STT status
 
   // Debounced API call for suggestions
   useEffect(() => {
@@ -42,6 +47,31 @@ const SearchBox = ({ variant }) => {
     window.location.href = `/search?q=${encodeURIComponent(query)}`;
   };
 
+  // STT: Start and Stop Listening
+  const startListening = () => {
+    if (!SpeechRecognition) {
+      console.error("Web Speech API not supported.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (event) =>
+      console.error("Speech recognition error:", event.error);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+    };
+
+    recognition.start();
+  };
+
   // Variant-specific styles
   const containerStyles =
     variant === "hero"
@@ -66,7 +96,30 @@ const SearchBox = ({ variant }) => {
           className={`flex-1 px-4 py-2 rounded-xl outline-none ${inputStyles}`}
         />
 
-        {/* Visual Search Button (Bonus) */}
+        {/* STT Button */}
+        <button
+          type="button"
+          onClick={startListening}
+          className={`p-2 ${isListening ? "text-red-600" : "text-gray-600"} hover:text-blue-600`}
+          aria-label="Start voice search"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 1.5a3.75 3.75 0 0 1 3.75 3.75v6a3.75 3.75 0 0 1-7.5 0v-6A3.75 3.75 0 0 1 12 1.5Zm7.5 9.75v.75a7.5 7.5 0 0 1-15 0v-.75m7.5 7.5v3m-3 0h6"
+            />
+          </svg>
+        </button>
+
+        {/* Visual Search Button */}
         {variant !== "hero" && <VisualSearchButton />}
 
         {/* Search Button */}

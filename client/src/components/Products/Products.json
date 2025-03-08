@@ -1,0 +1,81 @@
+[
+    {
+      "name": "Smartphone X200",
+      "brand": "TechCorp",
+      "price": 699.99,
+      "rating": 4.5,
+      "reviews": 120,
+      "link": "https://example.com/products/smartphone-x200",
+      "category": "Electronics",
+      "imageUrl": "https://example.com/images/smartphone-x200.jpg",
+      "description": "A powerful smartphone with a stunning display and long-lasting battery.",
+      "availability": true,
+      "loyaltypoints": 50
+    },
+    {
+      "name": "Wireless Headphones",
+      "brand": "SoundMax",
+      "price": 149.99,
+      "rating": 4.8,
+      "reviews": 85,
+      "link": "https://example.com/products/wireless-headphones",
+      "category": "Accessories",
+      "imageUrl": "https://example.com/images/wireless-headphones.jpg",
+      "description": "Noise-canceling wireless headphones with superior sound quality.",
+      "availability": true,
+      "loyaltypoints": 20
+    },
+    {
+      "name": "Gaming Laptop Pro",
+      "brand": "GigaTech",
+      "price": 1299.99,
+      "rating": 4.6,
+      "reviews": 45,
+      "link": "https://example.com/products/gaming-laptop-pro",
+      "category": "Computers",
+      "imageUrl": "https://example.com/images/gaming-laptop-pro.jpg",
+      "description": "High-performance gaming laptop with RTX graphics.",
+      "availability": false,
+      "loyaltypoints": 100
+    },
+    {
+      "name": "Fitness Tracker",
+      "brand": "FitMaster",
+      "price": 79.99,
+      "rating": 4.2,
+      "reviews": 200,
+      "link": "https://example.com/products/fitness-tracker",
+      "category": "Wearables",
+      "imageUrl": "https://example.com/images/fitness-tracker.jpg",
+      "description": "Track your daily activities and monitor your heart rate.",
+      "availability": true,
+      "loyaltypoints": 15
+    },
+    {
+      "name": "4K Ultra HD TV",
+      "brand": "ViewPlus",
+      "price": 599.99,
+      "rating": 4.7,
+      "reviews": 300,
+      "link": "https://example.com/products/4k-ultra-hd-tv",
+      "category": "Home Appliances",
+      "imageUrl": "https://example.com/images/4k-ultra-hd-tv.jpg",
+      "description": "Immersive 4K experience with smart TV features.",
+      "availability": true,
+      "loyaltypoints": 80
+    },
+    {
+      "name": "Bluetooth Speaker",
+      "brand": "BassBoost",
+      "price": 49.99,
+      "rating": 4.3,
+      "reviews": 150,
+      "link": "https://example.com/products/bluetooth-speaker",
+      "category": "Audio",
+      "imageUrl": "https://example.com/images/bluetooth-speaker.jpg",
+      "description": "Portable Bluetooth speaker with deep bass and long battery life.",
+      "availability": true,
+      "loyaltypoints": 10
+    }
+  ]
+  

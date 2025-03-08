@@ -50,7 +50,7 @@ const VisualSearchButton = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setUploadedImage(file);
+      setUploadedImage(URL.createObjectURL(file));
     } else {
       alert("Please select an image!");
     }
@@ -58,18 +58,10 @@ const VisualSearchButton = () => {
 
   const proceedToResults = () => {
     if (uploadedImage) {
-      sendImageToBackend(uploadedImage);
+      alert("Proceeding to results..."); // Placeholder for actual function
     } else {
       alert("Please upload an image first!");
     }
-  };
-
-  const sendImageToBackend = (image) => {
-    const formData = new FormData();
-    formData.append("image", image);
-    fetch("/api/visual-search", { method: "POST", body: formData })
-      .then(handleResponse)
-      .catch(handleError);
   };
 
   const capturePhoto = () => {
@@ -78,7 +70,7 @@ const VisualSearchButton = () => {
       context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
       const imageData = canvasRef.current.toDataURL("image/png");
       setCapturedImage(imageData);
-      closeCamera(); // Close camera after capturing photo
+      closeCamera();
     }
   };
 
@@ -95,7 +87,6 @@ const VisualSearchButton = () => {
         aria-label="Visual search"
         onClick={handleDropdownClick}
       >
-        {/* Camera Icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -135,7 +126,7 @@ const VisualSearchButton = () => {
 
       {showCamera && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl p-6 relative">
             <h3 className="text-lg font-semibold mb-2 text-center">Capture Photo</h3>
             <video ref={videoRef} className="w-full rounded-lg shadow-lg mb-4" autoPlay muted />
             <div className="flex justify-center gap-4">
@@ -165,12 +156,20 @@ const VisualSearchButton = () => {
       />
 
       {uploadedImage && (
-        <button
-          onClick={proceedToResults}
-          className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
-        >
-          Proceed to Results
-        </button>
+        <div className="mt-4">
+          <h3 className="text-center mb-2 text-gray-600">Uploaded Image:</h3>
+          <img
+            src={uploadedImage}
+            alt="Uploaded Preview"
+            className="max-w-full h-auto rounded-md shadow-md mx-auto mb-4"
+          />
+          <button
+            onClick={proceedToResults}
+            className="block mx-auto bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+          >
+            Proceed to Results
+          </button>
+        </div>
       )}
     </div>
   );
