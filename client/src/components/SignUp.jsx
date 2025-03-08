@@ -28,8 +28,12 @@ const SignUp = () => {
             
             if (response.data.token) {
                 setSuccess("✅ Account created successfully! Redirecting...");
-                // Use auth context to login after successful signup
-                await signup(response.data.token, response.data.user);
+                // Pass the user data including the name from the form
+                const userData = {
+                    name: data.name,  // Use the name from the form data
+                    email: data.email
+                };
+                await signup(response.data.token, userData);
             } else {
                 setError("Registration failed. Please try again.");
             }
@@ -40,7 +44,7 @@ const SignUp = () => {
                 setError("Network error. Please try again.");
             }
         }
-    };
+    }; 
 
     return (
         <motion.div

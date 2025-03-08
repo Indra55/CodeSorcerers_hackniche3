@@ -22,7 +22,12 @@ const Login = () => {
             const response = await axios.post("http://localhost:8000/auth/login", data);
             if (response.data.token) {
                 setSuccess("✅ Login successful! Redirecting...");
-                await login(response.data.token, response.data.user);
+                const userData = {
+                    userId: response.data.userId,
+                    name: response.data.name,
+                    email: data.email
+                };
+                await login(response.data.token, userData);
             } else {
                 setError("Invalid credentials. Please try again.");
             }

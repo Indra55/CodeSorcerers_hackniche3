@@ -13,26 +13,39 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check if user is logged in on mount
     const token = localStorage.getItem("token");
-    if (token) {
-      setUser(token);
+    const storedUser = localStorage.getItem("user");
+    
+    if (token && storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser({ token, ...userData });
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        // If there's an error parsing the stored data, clear it
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);
 
   const login = async (token, userData) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
     setUser({ token, ...userData });
-    navigate("/home"); // Redirect to home page after login
+    navigate("/"); // Redirect to root after login
   };
 
   const signup = async (token, userData) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
     setUser({ token, ...userData });
-    navigate("/home"); // Redirect to home page after signup
+    navigate("/"); // Redirect to root after signup
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     navigate("/login"); // Redirect to login page after logout
   };
