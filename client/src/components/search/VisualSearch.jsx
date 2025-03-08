@@ -1,40 +1,178 @@
+import React, { useState, useRef, useEffect } from "react";
+
 const VisualSearchButton = () => {
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // POST image to /api/visual-search
-      const formData = new FormData();
-      formData.append("image", file);
-      fetch("/api/visual-search", { method: "POST", body: formData })
-        .then((res) => res.json())
-        .then((results) => redirectToResults(results));
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [cameraError, setCameraError] = useState("");
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const wrapperRef = useRef(null);
+
+  // Handle clicks outside the component
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+        closeCamera();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Camera handlers
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch (err) {
+      setCameraError("Camera access denied. Please enable camera permissions.");
     }
   };
 
-  return (
-    <label className="visual-search-button">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="size-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
-        />
-      </svg>
+  const closeCamera = () => {
+    if (videoRef.current?.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    }
+    setShowCamera(false);
+    setCapturedImage(null);
+    setCameraError("");
+  };
 
-      <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
-    </label>
+  // Image handling
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedImage(file);
+    } else {
+      alert("Please select an image!");
+    }
+  };
+
+  const proceedToResults = () => {
+    if (uploadedImage) {
+      sendImageToBackend(uploadedImage);
+    } else {
+      alert("Please upload an image first!");
+    }
+  };
+
+  const sendImageToBackend = (image) => {
+    const formData = new FormData();
+    formData.append("image", image);
+    fetch("/api/visual-search", { method: "POST", body: formData })
+      .then(handleResponse)
+      .catch(handleError);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext("2d");
+      context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+      const imageData = canvasRef.current.toDataURL("image/png");
+      setCapturedImage(imageData);
+      closeCamera(); // Close camera after capturing photo
+    }
+  };
+
+  // UI interactions
+  const handleDropdownClick = () => {
+    setDropdownOpen((prev) => !prev);
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-600"
+        aria-label="Visual search"
+        onClick={handleDropdownClick}
+      >
+        {/* Camera Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+          />
+        </svg>
+      </button>
+
+      {dropdownOpen && (
+        <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-md">
+          <button
+            onClick={() => {
+              setShowCamera(true);
+              startCamera();
+              setDropdownOpen(false);
+            }}
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Use Camera
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Upload Image
+          </button>
+        </div>
+      )}
+
+      {showCamera && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl p-4">
+            <h3 className="text-lg font-semibold mb-2 text-center">Capture Photo</h3>
+            <video ref={videoRef} className="w-full rounded-lg shadow-lg mb-4" autoPlay muted />
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={capturePhoto}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              >
+                Capture
+              </button>
+              <button
+                onClick={closeCamera}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        ref={fileInputRef}
+        className="hidden"
+      />
+
+      {uploadedImage && (
+        <button
+          onClick={proceedToResults}
+          className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+        >
+          Proceed to Results
+        </button>
+      )}
+    </div>
   );
 };
 
