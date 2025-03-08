@@ -20,7 +20,7 @@ const verifyToken = require('./middleware/auth')
 const server = express()
 
 // database connection
-connectToDB()
+connectToDB() 
 
 // middlewares
 server.use(cors({ origin: process.env.ORIGIN, credentials: true, exposedHeaders: ['X-Total-Count'], methods: ['GET', 'POST', 'PATCH', 'DELETE'] }))
@@ -46,4 +46,4 @@ server.get("/", (req, res) => {
 
 server.listen(8000, () => {
     console.log('server [STARTED] ~ http://localhost:8000');
-}) 
+})  
