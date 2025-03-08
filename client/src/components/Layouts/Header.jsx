@@ -99,7 +99,7 @@ const Header = () => {
           >
             <UserIcon className="h-6 w-6 text-gray-600" />
             <span className="ml-2 text-gray-700 hidden lg:inline">
-              Hi, {user?.firstName || 'Guest'}
+              Hi, {user?.name || user?.firstName || 'Guest'}
             </span>
             <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm hidden md:inline">
               {user?.loyaltyPoints || 0} pts
