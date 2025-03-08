@@ -1,13 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
     const [data, setData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleChange = ({ currentTarget: input }) => {
         setData({ ...data, [input.name]: input.value });
@@ -18,21 +19,21 @@ const Login = () => {
         setError("");
         setSuccess("");
         try {
-            const res = await axios.post("http://localhost:8000/auth/login", data);
-            if (res.data.token) {
-                localStorage.setItem("token", res.data.token);
+            const response = await axios.post("http://localhost:8000/auth/login", data);
+            if (response.data.token) {
                 setSuccess("✅ Login successful! Redirecting...");
-                
-                // Hide success message after 3 seconds and navigate
-                setTimeout(() => {
-                    setSuccess("");
-                    navigate("/");
-                }, 3000);
+                await login(response.data.token, response.data.user);
             } else {
-                setError("Login failed, please try again.");
+                setError("Invalid credentials. Please try again.");
             }
         } catch (error) {
-            setError(error.response?.data?.message || "Server not responding. Try again later.");
+            if (error.response && error.response.status === 401) {
+                setError("Invalid email or password");
+            } else if (error.response && error.response.data?.message) {
+                setError(error.response.data.message);
+            } else {
+                setError("Server not responding. Please try again later.");
+            }
         }
     };
     

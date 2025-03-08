@@ -4,20 +4,28 @@ import Signup from "./components/SignUp";
 import Main from "./components/MainLogsign";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import { AuthProvider } from "./context/AuthContext";
+
 const App = () => {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Main />
-        </ProtectedRoute>
-      } />
-
-      <Route path="*" element={<h1>404 Not Found</h1>} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+      </Routes>
+    </AuthProvider>
   );
 };
 

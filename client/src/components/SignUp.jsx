@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const SignUp = () => {
     const [data, setData] = useState({
@@ -11,7 +12,7 @@ const SignUp = () => {
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const navigate = useNavigate();
+    const { signup } = useAuth();
 
     const handleChange = ({ currentTarget: input }) => {
         setData({ ...data, [input.name]: input.value });
@@ -21,18 +22,17 @@ const SignUp = () => {
         e.preventDefault();
         setError("");
         setSuccess("");
-        navigate("/home")
         try {
-            console.log("Submitting data:", data);
             const url = "http://localhost:8000/auth/register";
-            const { data: res } = await axios.post(url, data);
-            setSuccess("✅ Account created successfully! Redirecting...");
+            const response = await axios.post(url, data);
             
-            // Hide success message after 3 seconds and navigate to login
-            setTimeout(() => {
-                setSuccess("");
-                navigate("/login");
-            }, 3000);
+            if (response.data.token) {
+                setSuccess("✅ Account created successfully! Redirecting...");
+                // Use auth context to login after successful signup
+                await signup(response.data.token, response.data.user);
+            } else {
+                setError("Registration failed. Please try again.");
+            }
         } catch (error) {
             if (error.response && error.response.status >= 400 && error.response.status <= 500) {
                 setError(error.response.data.message);
