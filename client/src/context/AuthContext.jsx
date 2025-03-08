@@ -33,14 +33,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser({ token, ...userData });
-    navigate("/"); // Redirect to root after login
+    navigate("/home"); // Redirect to home after login
   };
 
   const signup = async (token, userData) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser({ token, ...userData });
-    navigate("/"); // Redirect to root after signup
+    navigate("/home"); // Redirect to home after signup
   };
 
   const logout = () => {
