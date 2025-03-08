@@ -5,6 +5,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import { AuthProvider } from "./context/AuthContext";
+import Layout from "./components/Layouts";
+import ProductList from "./components/Products/ProductList";
+import ProductDetails from "./components/Products/ProductDetails";
 
 const App = () => {
   return (
