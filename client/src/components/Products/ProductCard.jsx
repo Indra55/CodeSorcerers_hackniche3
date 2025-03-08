@@ -31,7 +31,7 @@ const ProductCard = ({ product }) => {
       <div className="relative overflow-hidden">
         <div className="aspect-[3/4] overflow-hidden bg-gray-100">
           <img
-            src={product.imageUrl || '/placeholder.svg'}
+            src={product.image_url || '/placeholder.svg'}
             alt={product.name}
             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           />
