@@ -1,104 +1,69 @@
-const { Schema, default: mongoose } = require("mongoose")
-const Product=require("../models/Product")
+const Product = require("../models/Product");
 
-exports.create=async(req,res)=>{
+// Create a new product
+const create = async (req, res) => {
     try {
-        const created=new Product(req.body)
-        await created.save()
-        res.status(201).json(created)
+        const product = new Product(req.body);
+        await product.save();
+        res.status(201).json(product);
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({message:'Error adding product, please trying again later'})
-    }
-}
-
-exports.getAll = async (req, res) => {
-    try {
-        const filter={}
-        const sort={}
-        let skip=0
-        let limit=0
-
-        if(req.query.brand){
-            filter.brand={$in:req.query.brand}
-        }
-
-        if(req.query.category){
-            filter.category={$in:req.query.category}
-        }
-
-        if(req.query.user){
-            filter['isDeleted']=false
-        }
-
-        if(req.query.sort){
-            sort[req.query.sort]=req.query.order?req.query.order==='asc'?1:-1:1
-        }
-
-        if(req.query.page && req.query.limit){
-
-            const pageSize=req.query.limit
-            const page=req.query.page
-
-            skip=pageSize*(page-1)
-            limit=pageSize
-        }
-
-        const totalDocs=await Product.find(filter).sort(sort).populate("brand").countDocuments().exec()
-        const results=await Product.find(filter).sort(sort).populate("brand").skip(skip).limit(limit).exec()
-
-        res.set("X-Total-Count",totalDocs)
-
-        res.status(200).json(results)
-    
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error fetching products, please try again later'})
+        res.status(400).json({ error: error.message });
     }
 };
 
-exports.getById=async(req,res)=>{
+// Get all products
+const getAll = async (req, res) => {
     try {
-        const {id}=req.params
-        const result=await Product.findById(id).populate("brand").populate("category")
-        res.status(200).json(result)
+        const products = await Product.find();
+        res.json(products);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error getting product details, please try again later'})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
-exports.updateById=async(req,res)=>{
+// Get product by ID
+const getById = async (req, res) => {
     try {
-        const {id}=req.params
-        const updated=await Product.findByIdAndUpdate(id,req.body,{new:true})
-        res.status(200).json(updated)
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json(product);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error updating product, please try again later'})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
-exports.undeleteById=async(req,res)=>{
+// Update product by ID
+const updateById = async (req, res) => {
     try {
-        const {id}=req.params
-        const unDeleted=await Product.findByIdAndUpdate(id,{isDeleted:false},{new:true}).populate('brand')
-        res.status(200).json(unDeleted)
+        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json(product);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error restoring product, please try again later'})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
-exports.deleteById=async(req,res)=>{
+// Delete product by ID
+const deleteById = async (req, res) => {
     try {
-        const {id}=req.params
-        const deleted=await Product.findByIdAndUpdate(id,{isDeleted:true},{new:true}).populate("brand")
-        res.status(200).json(deleted)
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json({ message: "Product deleted successfully" });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error deleting product, please try again later'})
+        res.status(500).json({ error: error.message });
     }
-}
+};
 
-
+module.exports = {
+    create,
+    getAll,
+    getById,
+    updateById,
+    deleteById
+};

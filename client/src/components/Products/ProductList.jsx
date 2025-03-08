@@ -1,63 +1,79 @@
-// src/Products/ProductList/ProductList.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import ProductCard from '../Products/ProductCard';
+import ProductCard from './ProductCard';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-const ProductList = ({ initialProducts = [] }) => {
+// Use import.meta.env for environment variables in Vite
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [selectedPrice, setSelectedPrice] = useState('All Prices');
+  const [selectedBrand, setSelectedBrand] = useState('All Brands');
+  const [sortOption, setSortOption] = useState('Newest');
 
   useEffect(() => {
-    if (initialProducts.length > 0) {
-      setProducts(initialProducts);
-      setLoading(false);
-      return;
-    }
-
-    const loadProducts = async () => {
+    const fetchProducts = async () => {
       try {
-        setTimeout(() => {
-          const dummyProducts = Array.from({ length: 12 }, (_, i) => ({
-            id: i + 1,
-            name: `Product ${i + 1}`,
-            brand: `Brand ${(i % 5) + 1}`,
-            price: 19.99 + i * 10,
-            rating: 3 + (i % 3),
-            reviews: 10 + i * 5,
-            availability: i % 4 !== 0,
-            loyaltypoints: i * 5,
-            imageUrl: '/placeholder.svg',
-            description: 'Premium quality product for modern lifestyles',
-          }));
-          setProducts(dummyProducts);
-          setLoading(false);
-        }, 1000);
+        console.log("Fetching from:", API_URL + "/products");  // Debugging line
+        const response = await fetch(`${API_URL}/products`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        console.log("Fetched products:", data);
+        setProducts(data);
       } catch (error) {
-        console.error('Error loading products:', error);
+        console.error("Error fetching products:", error);
+      } finally {
         setLoading(false);
       }
     };
+  
+    fetchProducts();
+  }, []);
 
-    loadProducts();
-  }, [initialProducts]);
+  // Filter products
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const matchesSearch =
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.brand.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+        const matchesCategory =
+          selectedCategory === 'All Categories' || product.category === selectedCategory;
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
+        const matchesBrand =
+          selectedBrand === 'All Brands' || product.brand === selectedBrand;
 
+        const matchesPrice =
+          selectedPrice === 'All Prices' ||
+          (selectedPrice === 'Under $50' && product.price < 50) ||
+          (selectedPrice === '$50 - $100' && product.price >= 50 && product.price <= 100) ||
+          (selectedPrice === 'Over $100' && product.price > 100);
+
+        return matchesSearch && matchesCategory && matchesBrand && matchesPrice;
+      })
+      .sort((a, b) => {
+        if (sortOption === 'Price: Low to High') return a.price - b.price;
+        if (sortOption === 'Price: High to Low') return b.price - a.price;
+        if (sortOption === 'Rating') return b.rating - a.rating;
+        return b.id - a.id;
+      });
+  }, [products, searchTerm, selectedCategory, selectedBrand, selectedPrice, sortOption]);
+
+  // Handlers
+  const handleSearchChange = useCallback((e) => setSearchTerm(e.target.value), []);
+  const toggleFilters = useCallback(() => setShowFilters(!showFilters), [showFilters]);
+
+  // Loading skeleton
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
@@ -82,21 +98,19 @@ const ProductList = ({ initialProducts = [] }) => {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl md:text-3xl font-light">New Arrivals</h1>
-          
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex-grow">
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             </div>
-            
             <button
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={toggleFilters}
               className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <SlidersHorizontal className="w-5 h-5" />
@@ -112,58 +126,38 @@ const ProductList = ({ initialProducts = [] }) => {
             className="bg-gray-50 p-4 rounded-lg mb-6"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-                  <option>All Categories</option>
-                  <option>Tops</option>
-                  <option>Bottoms</option>
-                  <option>Accessories</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Price</label>
-                <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-                  <option>All Prices</option>
-                  <option>Under $50</option>
-                  <option>$50 - $100</option>
-                  <option>Over $100</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Brand</label>
-                <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-                  <option>All Brands</option>
-                  <option>Brand 1</option>
-                  <option>Brand 2</option>
-                  <option>Brand 3</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Sort By</label>
-                <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
-                  <option>Newest</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Rating</option>
-                </select>
-              </div>
+              <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="p-2 border rounded-md">
+                <option>All Categories</option>
+                <option>Tops</option>
+                <option>Bottoms</option>
+                <option>Accessories</option>
+              </select>
+              <select value={selectedPrice} onChange={(e) => setSelectedPrice(e.target.value)} className="p-2 border rounded-md">
+                <option>All Prices</option>
+                <option>Under $50</option>
+                <option>$50 - $100</option>
+                <option>Over $100</option>
+              </select>
+              <select value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)} className="p-2 border rounded-md">
+                <option>All Brands</option>
+                <option>Brand 1</option>
+                <option>Brand 2</option>
+                <option>Brand 3</option>
+              </select>
+              <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="p-2 border rounded-md">
+                <option>Newest</option>
+                <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
+                <option>Rating</option>
+              </select>
             </div>
           </motion.div>
         )}
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-      >
+      <motion.div initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product._id || product.id || index} product={product} />
         ))}
       </motion.div>
 
