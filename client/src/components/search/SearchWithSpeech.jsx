@@ -7,6 +7,7 @@ const SearchWithSpeech = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -44,6 +45,57 @@ const SearchWithSpeech = () => {
 
     return () => recognition.stop();
   }, [isListening]);
+
+  const processTranscript = async () => {
+    if (!transcript.trim()) {
+      alert("Please speak something first!");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      console.log("Starting to process transcript...");
+      console.log(transcript);
+      // Log the exact data we're sending
+      const requestData = { text: transcript };
+      console.log("Sending data to server:", requestData);
+
+      const response = await fetch('http://127.0.0.1:3000/text', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '/'
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      console.log("Response status:", response.status);
+      
+      // Log the raw response text for debugging
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+
+      // Try to parse the response as JSON
+      const data = JSON.parse(responseText);
+      console.log("Parsed response data:", data);
+
+      if (data.keywords && data.keywords.length > 0) {
+        console.log("Found keywords:", data.keywords);
+        const searchQuery = data.keywords.join(' ');
+        window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      } else {
+        console.log("No keywords found in response");
+        alert('No keywords found in the speech');
+      }
+    } catch (error) {
+      console.error('Detailed error:', error);
+      alert('Error processing speech. Please try again.');
+    } finally {
+      setIsProcessing(false);
+      setIsModalOpen(false);
+    }
+  };
 
   const handleSpeechButton = () => {
     setIsListening((prev) => !prev);
@@ -124,12 +176,23 @@ const SearchWithSpeech = () => {
                       {transcript || "Start speaking to see the transcript..."}
                     </motion.p>
                   </div>
-                  <div className="flex justify-end mt-4">
+                  <div className="flex justify-end gap-2 mt-4">
                     <button
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700"
                       onClick={closeModal}
                     >
-                      Close
+                      Cancel
+                    </button>
+                    <button
+                      className={`px-4 py-2 rounded-lg shadow ${
+                        isProcessing 
+                          ? 'bg-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      } text-white`}
+                      onClick={processTranscript}
+                      disabled={isProcessing || !transcript.trim()}
+                    >
+                      {isProcessing ? 'Processing...' : 'Search'}
                     </button>
                   </div>
                 </Dialog.Panel>
@@ -138,6 +201,33 @@ const SearchWithSpeech = () => {
           </div>
         </Dialog>
       </Transition>
+
+      {/* Test Server Connection Button */}
+      <button
+        onClick={async () => {
+          try {
+            console.log("Testing endpoint connection...");
+            const testResponse = await fetch('http://127.0.0.1:3000/text', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Origin': 'http://localhost:5173'
+              },
+              mode: 'cors',
+              body: JSON.stringify({ text: "test message about phone" })
+            });
+            console.log("Test response status:", testResponse.status);
+            const testData = await testResponse.text();
+            console.log("Test response:", testData);
+          } catch (error) {
+            console.error("Test failed:", error);
+          }
+        }}
+        className="mt-2 w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+      >
+        Test Server Connection
+      </button>
     </div>
   );
 };

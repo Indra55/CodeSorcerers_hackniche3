@@ -49,7 +49,9 @@ const VisualSearchButton = () => {
 
   // Image handling
   const handleImageUpload = (e) => {
+    console.log(e.target.files)
     const file = e.target.files?.[0];
+    console.log("yah")
     if (file) {
       setUploadedImage(URL.createObjectURL(file));
     } else {
@@ -65,29 +67,43 @@ const VisualSearchButton = () => {
 
     try {
       setIsProcessing(true);
+      console.log("Starting request process..."); // Debug log
 
       const formData = new FormData();
       formData.append('image', fileInputRef.current.files[0]);
-
+      console.log("FormData created:", fileInputRef.current.files[0].name); // Debug log
+      
       const response = await fetch('http://127.0.0.1:3000/imagesearch', {
         method: 'POST',
         body: formData,
+        mode: 'cors',
+        headers: {
+          'Accept': '/'
+        }
       });
 
+      console.log("Response received:", response.status); // Debug log
+
       if (!response.ok) {
+        console.error("Response not OK:", response.status, response.statusText); // Debug log
+        const errorText = await response.text();
+        console.error("Error details:", errorText);
         throw new Error('Failed to process image');
       }
 
       const data = await response.json();
-       
+      console.log("Response data:", data); // Debug log
+      
       if (data.keywords) {
-        // Direct navigation without event logging
-        window.location.href = `/search?q=${encodeURIComponent(data.keywords.join(' '))}`;
+        console.log("Keywords found:", data.keywords); // Debug log
+        const searchQuery = data.keywords.join(' ');
+        window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
       } else {
+        console.log("No keywords in response"); // Debug log
         alert('No keywords found in the image');
       }
     } catch (error) {
-      console.error('Error processing image:', error);
+      console.error('Detailed error:', error); // Enhanced error logging
       alert('Error processing image. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -146,8 +162,11 @@ const VisualSearchButton = () => {
             Use Camera
           </button>
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={(e) => {
+              e.preventDefault();
+              fileInputRef.current?.click()}}
             className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+            // type="button"
           >
             Upload Image
           </button>
