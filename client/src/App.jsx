@@ -9,6 +9,8 @@ import Layout from "./components/Layouts";
 import ProductList from "./components/Products/ProductList";
 import ProductDetails from "./components/Products/ProductDetails";
 import { useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+
 
 // Public route wrapper that redirects to home if already logged in
 const PublicRoute = ({ children }) => {
@@ -22,6 +24,7 @@ const PublicRoute = ({ children }) => {
 const App = () => {
   return (
     <AuthProvider>
+      <CartProvider>
       <Layout>
         <Routes>
           {/* Public Routes */}
@@ -69,6 +72,7 @@ const App = () => {
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </Layout>
+      </CartProvider>
     </AuthProvider>
   );
 };

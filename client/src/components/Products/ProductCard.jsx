@@ -9,9 +9,14 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
   const handleClick = () => {
-    const slug = product.name.toLowerCase().replace(/ /g, '-');
+    // Store the product in localStorage for the details page
     localStorage.setItem('selectedProduct', JSON.stringify(product));
-    navigate(`/products/${slug}`);
+    
+    // Use the product ID or _id for the URL parameter (singular 'product' not 'products')
+    const productId = product._id || product.id || 'unknown';
+    
+    // Navigate to the correct route format: /product/:id (singular)
+    navigate(`/product/${productId}`);
   };
 
   const handleAddToCart = (e) => {
