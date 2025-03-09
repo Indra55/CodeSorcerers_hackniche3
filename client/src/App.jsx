@@ -8,6 +8,9 @@ import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layouts";
 import ProductList from "./components/Products/ProductList";
 import ProductDetails from "./components/Products/ProductDetails";
+import CartPage from "./components/Cart/Cart";
+import CheckoutPage from "./components/Checkout/Checkout";
+import OrderConfirmation from "./components/Checkout/OrderConfirmation";
 import { useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
@@ -42,7 +45,7 @@ const App = () => {
           {/* Protected Routes */}
           <Route path="/home" element={
             <ProtectedRoute>
-              <Home />
+              <ProductList />
             </ProtectedRoute>
           } />
           <Route path="/profile" element={
@@ -58,6 +61,21 @@ const App = () => {
           <Route path="/product/:id" element={
             <ProtectedRoute>
               <ProductDetails />
+            </ProtectedRoute>
+          } />
+          <Route path="/cart" element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/checkout" element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/order-confirmation/:id" element={
+            <ProtectedRoute>
+              <OrderConfirmation />
             </ProtectedRoute>
           } />
 
