@@ -60,11 +60,16 @@ exports.getAll = async (req, res) => {
 exports.getById=async(req,res)=>{
     try {
         const {id}=req.params
+        console.log('Fetching product with ID:', id); // Debug log
         const result=await Product.findById(id).populate("brand").populate("category")
+        console.log('Found product:', result); // Debug log
+        if (!result) {
+            return res.status(404).json({message: 'Product not found'});
+        }
         res.status(200).json(result)
     } catch (error) {
-        console.log(error);
-        res.status(500).json({message:'Error getting product details, please try again later'})
+        console.log('Detailed error:', error); // More detailed error logging
+        res.status(500).json({message:'Error getting product details, please try again later', error: error.message})
     }
 }
 

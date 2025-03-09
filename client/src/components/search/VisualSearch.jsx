@@ -10,6 +10,7 @@ const VisualSearchButton = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const wrapperRef = useRef(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Handle clicks outside the component
   useEffect(() => {
@@ -56,11 +57,40 @@ const VisualSearchButton = () => {
     }
   };
 
-  const proceedToResults = () => {
-    if (uploadedImage) {
-      alert("Proceeding to results..."); // Placeholder for actual function
-    } else {
+  const proceedToResults = async () => {
+    if (!uploadedImage || !fileInputRef.current?.files[0]) {
       alert("Please upload an image first!");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      const formData = new FormData();
+      formData.append('image', fileInputRef.current.files[0]);
+
+      const response = await fetch('http://127.0.0.1:3000/imagesearch', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process image');
+      }
+
+      const data = await response.json();
+       
+      if (data.keywords) {
+        // Direct navigation without event logging
+        window.location.href = `/search?q=${encodeURIComponent(data.keywords.join(' '))}`;
+      } else {
+        alert('No keywords found in the image');
+      }
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Error processing image. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -165,9 +195,22 @@ const VisualSearchButton = () => {
           />
           <button
             onClick={proceedToResults}
-            className="block mx-auto bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+            disabled={isProcessing}
+            className={`block mx-auto ${
+              isProcessing ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'
+            } text-white px-4 py-2 rounded-md transition`}
           >
-            Proceed to Results
+            {isProcessing ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            ) : (
+              'Proceed to Results'
+            )}
           </button>
         </div>
       )}

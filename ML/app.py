@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from transformers import pipeline
 import io
 from PIL import Image
@@ -21,7 +22,16 @@ nltk.download('punkt_tab')
 nltk.download('omw-1.4')  # Open Multilingual Wordnet
 nltk.download('wordnet')
 
-app = Flask(__name__)
+app = Flask(_name_)
+# Enable CORS for all routes
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["POST", "GET", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Range", "X-Content-Range"]
+    }
+})
 
 # Check if GPU is available
 device = 0 if torch.cuda.is_available() else -1
@@ -180,7 +190,7 @@ def extract_product_keywords(text):
         print(f"Error in keyword extraction: {str(e)}")
         return []
 
-@app.route('/', methods=['POST'])
+@app.route('/imagesearch', methods=['POST'])
 def generate_caption():
     try:
         # Check if image file is present in the request
@@ -248,5 +258,5 @@ def process_text():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(host='0.0.0.0', port=3000, debug=True)

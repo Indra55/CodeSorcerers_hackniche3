@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ChatBubbleLeftRightIcon, XMarkIcon, ArrowUpIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -69,7 +70,7 @@ const ChatBot = () => {
       // Add bot response
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        text: response.data || 'Sorry, I could not process your request.'
+        text: response.data || 'Sorry, I could not process your request.' 
       }]);
     } catch (error) {
       console.error('Chatbot API Error:', error);
@@ -87,7 +88,7 @@ const ChatBot = () => {
 
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        text: errorMessage
+        text: errorMessage 
       }]);
     } finally {
       setIsLoading(false);
@@ -125,7 +126,7 @@ const ChatBot = () => {
           >
             {/* Chat Header */}
             <div className="bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-500 p-3 sm:p-4 relative overflow-hidden shrink-0">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNTYiIGhlaWdodD0iMTAwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDU2IDEwMCBIIDAgTCAwIDAgTCA1NiAwIEwgNTYgMTAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,...')] opacity-30"></div>
               <div className="flex justify-between items-center relative z-10">
                 <div className="flex items-center space-x-3">
                   <div className="bg-white/10 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-white/20">
@@ -179,7 +180,7 @@ const ChatBot = () => {
                         : 'bg-white/80 backdrop-blur-sm text-gray-800 shadow-lg shadow-gray-100/50 rounded-bl-none border border-white/50'
                     }`}
                   >
-                    {message.text}
+                    <ReactMarkdown>{message.text}</ReactMarkdown>
                   </div>
                 </motion.div>
               ))}
@@ -189,55 +190,37 @@ const ChatBot = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex justify-start"
                 >
-                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center mr-2 shadow-lg">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-2xl bg-gray-300 flex items-center justify-center mr-2 animate-pulse">
                     <ChatBubbleLeftRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-4 shadow-lg shadow-gray-100/50 rounded-bl-none border border-white/50">
-                    <div className="flex space-x-2">
-                      <motion.div
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-full"
-                      />
-                      <motion.div
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-full"
-                      />
-                      <motion.div
-                        animate={{ y: [0, -6, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-full"
-                      />
-                    </div>
+                  <div className="max-w-[80%] sm:max-w-[75%] rounded-2xl p-3 sm:p-4 text-sm sm:text-base bg-white/80 backdrop-blur-sm text-gray-800 shadow-lg shadow-gray-100/50 rounded-bl-none border border-white/50">
+                    <div className="w-3/4 h-4 bg-gray-200 animate-pulse"></div>
                   </div>
                 </motion.div>
               )}
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef}></div>
             </div>
 
-            {/* Chat Input */}
-            <div className="border-t border-gray-100/20 p-3 sm:p-4 bg-white/80 backdrop-blur-xl shrink-0">
-              <form onSubmit={handleSendMessage} className="flex space-x-2">
+            {/* Message Input */}
+            <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-gradient-to-t from-gray-50/80 to-white/60">
+              <div className="flex items-center space-x-3">
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask Optimus about products..."
-                  disabled={isLoading}
-                  className="flex-1 bg-gray-50/50 border border-gray-100 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:bg-gray-50 disabled:cursor-not-allowed placeholder-gray-400 text-gray-600 text-sm sm:text-base"
+                  placeholder="Type a message..."
+                  className="w-full bg-white/70 backdrop-blur-md rounded-2xl py-2 px-4 text-sm sm:text-base text-gray-800 shadow-md border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={isLoading || !inputMessage.trim()}
-                  className="bg-gradient-to-br from-indigo-600 to-blue-500 text-white p-2 sm:p-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="p-2 sm:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl"
                 >
-                  <ArrowUpIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ArrowUpIcon className="h-5 w-5" />
                 </motion.button>
-              </form>
-            </div>
+              </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
@@ -245,4 +228,4 @@ const ChatBot = () => {
   );
 };
 
-export default ChatBot; 
+export default ChatBot;

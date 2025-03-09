@@ -8,7 +8,7 @@ const productSchema = new Schema({
   rating: { type: Number, default: 0 }, // Rating as a number
   reviews: { type: Number, default: 0 }, // Number of reviews as an integer
   link: { type: String }, // Product URL link
-  search_query: { type: String }, // Keywords associated with the product
+  category: { type: String }, // Keywords associated with the product
   image_url: { type: String }, // URL of the product's image
   description: { type: String }, // Detailed description of the product
   availability: { type: Number, default: 0 }, // Availability as a number (e.g., stock count)
