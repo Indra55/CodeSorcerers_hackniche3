@@ -1,13 +1,11 @@
-const express=require('express')
-const productController=require("../controllers/Product")
-const router=express.Router()
+const express = require("express");
+const productController = require("../controllers/Product");
+const router = express.Router();
 
-router
-    .post("/",productController.create)
-    .get("/",productController.getAll)
-    .get("/:id",productController.getById)
-    .patch("/:id",productController.updateById)
-    .patch("/undelete/:id",productController.undeleteById)
-    .delete("/:id",productController.deleteById)
+router.post("/", productController.create);
+router.get("/", productController.getAll);
+router.get("/:id", productController.getById);
+router.patch("/:id", productController.updateById);
+router.delete("/:id", productController.deleteById);
 
-module.exports=router
+module.exports = router;
